@@ -1,86 +1,188 @@
-/*
- * Class containing player data (fleet location, self and attack data)
- * @author Group 3
- * @version 1.2
- */
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * Class containing player data : fleet information, attack data, etc
+ * @author Group 3
+ * @version 1.2
+ */
 public class Player {
 
-	protected Game game;
-	protected String name;
-	protected Screen screen;
-	protected HashMap<String,Ship> fleet;
+	protected Game game;	//the associated game
+	protected String name;	
+	protected Screen screen;	//the associated screen	
+	protected HashMap<String,Ship> fleet;	//map of ship name to Ship object for quick retrieval
 	protected int[][] selfData = new int[10][10];	//0=available/not targeted, 1=miss, 2=ship exists&not targeted, 3=hit
 	protected int[][] attackData = new int[10][10];	//0=not yet targeted, 1=targeted shot, 2=hit, 3=miss
-	
-	//constructs a new player of name n
+
+	/**
+	 * Class constructor for a new player of name n.
+	 * Sets up the selfData as 0,i.e., available at all locations
+	 * @param n	name or ID of the player
+	 * @param game	the associated Game object
+	 */
 	public Player(String n, Game game) {
 		this.name = n;
 		this.game = game;
-	    fleet = new HashMap<String,Ship>();
-	    for(int i=0;i<10;i++)
-	    	for(int j=0;j<10;j++) {
-	    		selfData[i][j] =0;
-	    		attackData[i][j] =0;
-	    	}
+		fleet = new HashMap<String,Ship>();
+		for(int i=0;i<10;i++)
+			for(int j=0;j<10;j++) {
+				selfData[i][j] =0;
+				attackData[i][j] =0;
+			}
 		System.out.println(name+" created");
 	}
-	
-	//temporary constructor
-	public Player(String n) {
-		this(n,null);
-	}
-	
-	//add new screen to this player
+
+
+
+	/**
+	 * create new screen for this player
+	 */
 	public void addScreen() {
 		this.screen = new Screen(this);
 	}
-	//return associated game object
-	public Game getGame() {
-		return this.game;
-	}
-	
-	//return name of this player
-	public String getName() {
-		return this.name;
-	}
-	
-	//return screen of this player
+	/**
+	 * return screen of this player
+	 * @return screen	the associated Screen object for this player
+	 */
 	public Screen getScreen() {
 		return this.screen;
 	}
-	
-	//adds ship of type shipName at coordinates
+	/**
+	 * return associated game object
+	 * @return game		the associated Game object
+	 */
+	public Game getGame() {
+		return this.game;
+	}
+
+	/**
+	 * return name of this player
+	 * @return name		Name or ID of this player
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+
+
+	/**
+	 * This method is called by the player's self board to add the specified Ship object at specified coordinates.
+	 * Ship already contains coordinates in its location (Ship.location)
+	 * Self data of this player is updated by 2 at these coordinates
+	 * @param ship	Ship object to be added to fleet
+	 * @param coordinates	array of Coordinate specifying the location
+	 */
 	public void addShip(Ship ship, Coordinate[] coordinates) {
 		this.fleet.put(ship.getName(),ship);
 		this.updateSelfData(coordinates,2);
 	}
-	
-	//update data of self board with value at coordinates
+	/**
+	 * @param shipName	Name of ship to be searched in this player's fleet
+	 * @return	true if fleet contains ship by this name, otherwise false
+	 */
+	public boolean containsShip(String shipName) {
+		return this.fleet.containsKey(shipName);
+	}
+
+
+	/**
+	 * @param shipName	Name or ID of ship
+	 * @return ship of specified name from fleet
+	 */
+	public Ship getShip(String shipName) {
+		return fleet.get(shipName);
+	}
+
+	/**
+	 * @param shipName	Name or ID of ship
+	 * @return	ship's first location, i.e. leftmost or topmost coordinate for horizontal alignment or vertical alignment respectively
+	 */
+	public Coordinate getFirstCoordinate(String shipName) {
+		Ship ship = fleet.get(shipName);
+		return ship.getLocation()[0];
+	}
+	/**
+	 * @return fleet size of this player
+	 */
+	public int getFleetSize() {
+		return this.fleet.keySet().size();
+	}
+	/**
+	 * @return array of ships that are sunk
+	 */
+	public LinkedList<Ship> getSunkShips() {
+		LinkedList<Ship> sunkShips = new LinkedList<Ship>();
+		for(Ship ship : fleet.values())
+			if(ship.isSunk())
+				sunkShips.add(ship);
+		return sunkShips;
+	}
+
+	/**
+	 * @return data of self board where 0=available/not targeted, 1=miss, 2=ship exists&not targeted, 3=hit
+	 */
+	public int[][] getSelfData(){
+		return this.selfData;
+	}
+
+	/**
+	 * update data of self board with value at specified coordinates
+	 * @param coordinates	array of Coordinate to be updated
+	 * @param value 	new integral value (0=available/not targeted, 1=miss, 2=ship exists & not targeted, 3=hit)
+	 */
 	public void updateSelfData(Coordinate[] coordinates, int value) {
 		for(Coordinate c : coordinates) 
 			this.selfData[c.getY()][c.getX()] = value;
 		printSelfData();
 	}
-	
-	//return true if ship of type shipName exists in its fleet, else return false
-	public boolean containsShip(String shipName) {
-		return this.fleet.containsKey(shipName);
+
+	/**
+	 * @return data of attack board where 0=not yet targeted, 1=targeted shot, 2=hit, 3=miss
+	 */
+	public int[][] getAttackData() {
+		return this.attackData;
+	}
+
+	/**
+	 * set player's attackData[x][y] to corresponding value for dataValue(0=not yet targeted, 1=targeted shot, 2=hit, 3=miss)
+	 * @param x		x coordinate of attackData matrix
+	 * @param y		y coordinate of attackData matrix
+	 * @param value		dataValue corresponding to updated value
+	 */
+	public void setAttackData(int x, int y, dataValue value) {
+		int temp =0;
+		switch(value) {
+		case NOT_TARGETED : 
+			temp =0; 
+			break;
+		case SHOT :
+			temp =1;
+			break;
+		case HIT :
+			temp =2;
+			break;
+		case MISS :
+			temp=3;
+			break;
+		}
+		attackData[y][x] = temp;
+		printAttackData();
 	}
 	
-	//delete and return ship of type shipName from this player's fleet
-	public Ship deleteShip(String shipName) {
-		updateSelfData(fleet.get(shipName).getLocation(),0);
-		return this.fleet.remove(shipName);
-		
-	}
-	
-	//check if this ship can be placed at (x,y) with alignment align on board
-	public boolean checkPossible(String shipName, int shipSize, int x, int y, Alignment align) {
+	/**
+	 * This method checks if a ship of specified size can be placed on the player's fleet while respecting the following constraints : 
+	 * 1. The entirety of a ship must be placed on the board, i.e., edge constraints
+	 * 2. No two ships cannot be placed next to one another,i.e., no two ships can have the same alignment & be right next to each another on the same horizontal/vertical line
+	 * 3. No two ships can overlap 
+	 * @param shipSize	the size of this ship
+	 * @param x			the starting x coordinate
+	 * @param y			the starting y coordinate
+	 * @param align		the preferred alignment
+	 * @return true if ship can be placed starting from (x,y) with preferred alignment without violating game constraints; 
+	 * 			otherwise return false
+	 */
+	public boolean checkPossible(int shipSize, int x, int y, Alignment align) {
 		int endX, endY, prevX, prevY, nextX, nextY;
 		if(align.equals(Alignment.HORIZONTAL)) {
 			endX = x + shipSize - 1;
@@ -98,17 +200,13 @@ public class Player {
 			nextX = x;
 			nextY = Math.min(endY+1, 9);
 		}
-		System.out.println("next and prev coordinates :"+nextX+","+nextY+" "+prevX+","+prevY);
-		System.out.print("checking from "+x+","+y+" to "+endX+","+endY+"--");
 		if(endX >= 10 || endY >= 10) {	//edge constraints
 			System.out.println("edge");
 			return false;	
 		}
 		//check if any other ship is placed right next in the same alignment
 		for(Ship s : this.fleet.values()) { 
-			System.out.print("looking through "+s.getName());
 			if(s.getAlignment().equals(align)) { 
-				System.out.println(" whose alignment is "+s.getAlignment());
 				for(Coordinate c : s.getLocation()) { 
 					System.out.println(c.getX()+","+c.getY());
 					if((c.getX()==prevX && c.getY()==prevY) || (c.getX()==nextX && c.getY()==nextY)) {
@@ -118,7 +216,6 @@ public class Player {
 				}
 			}
 		}
-					
 		//check for collision : if this ship exists in fleet, disregard first coordinate
 		for(int i = x;i<=endX;i++)
 			for(int j = y;j<=endY;j++) {
@@ -131,43 +228,13 @@ public class Player {
 			}
 		return true;
 	}
-	
-	
-	
-	//get first coordinate of this ship
-	public Coordinate getFirstCoordinate(String shipName) {
-		Ship ship = fleet.get(shipName);
-		return ship.getLocation()[0];
-	}
-	
-	//get data of self board where 0=available/not targeted, 1=miss, 2=ship exists&not targeted, 3=hit
-	public int[][] getSelfData(){
-		return this.selfData;
-	}
-	
-	//return ship of type shipName from fleet
-	public Ship getShip(String shipName) {
-		return fleet.get(shipName);
-	}
-	
-	//print self data for debugging
-	public void printSelfData() {
-		for(int i=0;i<10;i++) {
-			for(int j=0;j<10;j++)
-				System.out.print(selfData[i][j]+" ");
-			System.out.println();
-		}
-	}
-	
-	//get fleet size of this player
-	public int getFleetSize() {
-		return this.fleet.keySet().size();
-	}
-	
-	/*
-	 * return true if Coordinate c is hit, else return false. 
-	 * Update selfData and opponent's attackData where applicable
-	 * Update ship's location hashmap 
+
+	/**
+	 * For each ship in this player's fleet, this method checks if any of them occupy specified coordinate.
+	 * Updates selfData with 3 or 1 for hit or miss respectively
+	 * Updates opponent player's attackData with 2 or 3 for hit or miss respectively
+	 * @param c	Coordinate to be hit
+	 * @return	true if hit; otherwise false
 	 */
 	public boolean hit(Coordinate c) {
 		System.out.print("Hitting "+name+" at Coordinate:"+c.getX()+","+c.getY()+"--");
@@ -190,43 +257,25 @@ public class Player {
 		this.game.getOppo(this).printAttackData();
 		return false;
 	}
-	
-	//get array of ships that are sunk
-	public LinkedList<Ship> getSunkShips() {
-		LinkedList<Ship> sunkShips = new LinkedList<Ship>();
-		for(Ship ship : fleet.values())
-			if(ship.isSunk())
-				sunkShips.add(ship);
-		return sunkShips;
-	}
 
-	//set player's attackData[x][y] to corresponding value for dataValue(0=not yet targeted, 1=targeted shot, 2=hit, 3=miss)
-	public void setAttackData(int x, int y, dataValue d) {
-		int temp =0;
-		switch(d) {
-		case NOT_TARGETED : 
-			temp =0; 
-			break;
-		case SHOT :
-			temp =1;
-			break;
-		case HIT :
-			temp =2;
-			break;
-		case MISS :
-			temp=3;
-			break;
+
+
+
+	/**
+	 * print self data for debugging purposes
+	 */
+	public void printSelfData() {
+		for(int i=0;i<10;i++) {
+			for(int j=0;j<10;j++)
+				System.out.print(selfData[i][j]+" ");
+			System.out.println();
 		}
-		attackData[y][x] = temp;
-		printAttackData();
 	}
 
-	//get player's attackData
-	public int[][] getAttackData() {
-		return this.attackData;
-	}
 
-	//print this player's attackData for debugging purposes
+	/**
+	 * print this player's attackData for debugging purposes
+	 */
 	public void printAttackData() {
 		for(int i=0;i<10;i++) {
 			for(int j=0;j<10;j++)
@@ -234,5 +283,9 @@ public class Player {
 			System.out.println();
 		}
 	}
+
+
 	
+
+
 }

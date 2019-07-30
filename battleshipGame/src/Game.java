@@ -27,12 +27,12 @@ public class Game extends JFrame implements ActionListener{
 	private ButtonGroup variation;
 	private ButtonGroup mode;
 	private JButton start;
-	
+
 	/**
 	 * Class constructor setting up the GUI of the initial welcome screen 
 	 */
 	public Game() {
-		
+
 		super();
 		this.setLayout(new BorderLayout());
 		this.add(new JLabel("Welcome to Battleship Game!", JLabel.CENTER), BorderLayout.NORTH);
@@ -74,23 +74,23 @@ public class Game extends JFrame implements ActionListener{
 		this.pack();
 		this.setVisible(true);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 	}
-	
+
 	/**
 	 * @return the first player
 	 */
 	public Player getP1() {
 		return this.player1;
 	}
-	
+
 	/**
 	 * @return the second player
 	 */
 	public Player getP2() {
 		return this.player2;
 	}
-	
+
 	/**
 	 * @param	p	a player
 	 * @return the opponent of the specified player
@@ -105,10 +105,10 @@ public class Game extends JFrame implements ActionListener{
 	 * main driver function
 	 */
 	public static void main(String[] args) {
-		
-		
+
+
 		Game game = new Game();
-		
+
 	}
 
 	/**
@@ -183,12 +183,12 @@ public class Game extends JFrame implements ActionListener{
 	public JRadioButton getHumanMode() {
 		return humanMode;
 	}
-	
+
 	/**
 	 * @return the start button to initiate game and firing deliberate clicks during testing
 	 */
 	public JButton getStartBtn() {
 		return start;
 	}
-	
+
 }

@@ -60,7 +60,7 @@ public class Computer extends Player{
 			if(a==1)
 				randomAlign = Alignment.VERTICAL;
 			System.out.println("AI: "+ship.getName()+" trying from "+randomX+","+randomY+" "+randomAlign);
-			if(super.checkPossible(ship.getName(), ship.getSize(), randomX, randomY, randomAlign)) {
+			if(super.checkPossible(ship.getSize(), randomX, randomY, randomAlign)) {
 				ship.setAlignment(randomAlign);
 				Coordinate[] coordinates = this.makeCoordinates(randomX, randomY, ship);
 				System.out.println("result from makeCoordinates:");
@@ -152,7 +152,7 @@ public class Computer extends Player{
 			for(int j=0;j<10;j++) {
 				for(String shipName : afloatShips.keySet()) {
 					int shipSize = afloatShips.get(shipName);
-					int[] temp = checkPossible(shipSize, j, i, Alignment.HORIZONTAL);
+					int[] temp = checkPossibleHit(shipSize, j, i, Alignment.HORIZONTAL);
 					if(temp!=null) {
 						for(int jTemp = j; jTemp <= temp[0];jTemp++) {
 							if(attackData[i][jTemp]==0)
@@ -177,7 +177,7 @@ public class Computer extends Player{
 							}
 						}
 					}
-					temp = checkPossible(shipSize, j, i, Alignment.VERTICAL);
+					temp = checkPossibleHit(shipSize, j, i, Alignment.VERTICAL);
 					if(temp!=null) {
 						for(int iTemp = i; iTemp <= temp[1];iTemp++) {
 							if(attackData[iTemp][j]==0)
@@ -241,7 +241,7 @@ public class Computer extends Player{
 
 
 	//check if ship of size shipSize can be placed at (x,y) with alignment align on attackData
-	private int[] checkPossible(int shipSize, int x, int y, Alignment align) {
+	public int[] checkPossibleHit(int shipSize, int x, int y, Alignment align) {
 		int endX, endY;
 		if(align.equals(Alignment.HORIZONTAL)) {
 			endX = x + shipSize - 1;

@@ -167,7 +167,7 @@ public class SelfBoard extends JPanel implements ActionListener{
 						System.out.println("release "+ship.getName()+" to "+cell.getName());
 						int x = (int)cell.getClientProperty("j");
 						int y = (int)cell.getClientProperty("i");
-						if(gt.getPlayer().checkPossible(ship.getName(),ship.getSize(), x,y, ship.getAlignment())) {
+						if(gt.getPlayer().checkPossible(ship.getSize(), x,y, ship.getAlignment())) {
 							/*TODO
 							 * place ship if possible
 							 * update player's selfdata
@@ -285,7 +285,7 @@ public class SelfBoard extends JPanel implements ActionListener{
 		Color c = null;
 		Ship ship = getShipTemp();
 		int iEnd = iStart, jEnd = jStart;
-		if(this.player.checkPossible(ship.getName(),ship.getSize(), jStart, iStart, ship.getAlignment())) {
+		if(this.player.checkPossible(ship.getSize(), jStart, iStart, ship.getAlignment())) {
 			if(ship.getAlignment().equals(Alignment.VERTICAL)) 
 				iEnd = iStart + ship.getSize() - 1;
 			else

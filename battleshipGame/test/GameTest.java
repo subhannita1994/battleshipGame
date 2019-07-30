@@ -11,7 +11,7 @@ import org.junit.Test;
  */
 
 /**
- * @author subhannitasarcar
+ * @author Group 3
  *
  */
 public class GameTest {
@@ -20,6 +20,7 @@ public class GameTest {
 	static String player1;
 	static String player2;
 	/**
+	 * Context : normal variation, human mode
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass

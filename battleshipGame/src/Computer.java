@@ -1,24 +1,24 @@
-/*
- * Class containing data for AI player (fleet location, self and attack data, fleet placement and attack strategy)
- * @author Group 3
- * @version 1.2
- */
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
-
 import javax.swing.JOptionPane;
-
+/**
+ * Class containing data and strategy for AI player (fleet location, self and attack data, fleet placement and attack strategy)
+ * @author Group 3
+ * @version 1.2
+ */
 public class Computer extends Player{
 
+	private LinkedList<Ship> shipInfo = new LinkedList<Ship>();	//list of ship objects
+	private int oppoSunkShips;	//number of sunk ships in opponent's fleet
+	private HashMap<String, Integer> afloatShips = new HashMap<String,Integer>();	//list of healthy ships in opponent's fleet
 
-
-	private LinkedList<Ship> shipInfo = new LinkedList<Ship>();
-	private int oppoSunkShips;
-	private HashMap<String, Integer> afloatShips = new HashMap<String,Integer>();
-
+	/**
+	 * Constructs a new Computer object with name n and associated with game
+	 * @param n	Name or ID of this Computer object
+	 * @param game	Game object this is associated with
+	 */
 	public Computer(String n, Game game) {
 		super(n, game);
 		shipInfo.add(new Ship("Carrier",5));
@@ -32,23 +32,20 @@ public class Computer extends Player{
 		afloatShips.put("Submarine",3);
 		afloatShips.put("Destroyer",2);
 		this.oppoSunkShips = 0;
-
 	}
 
-	//random set up fleet coordinates while respecting placement restraints
+	/**
+	 * random set up fleet coordinates while respecting placement constraints
+	 * Iterate until all ships are not placed: 
+	 * 		1. generate a random start coordinate(x,y) and random alignment
+	 * 		2. check if this ship can be placed from (x,y) with specified alignment
+	 * 		3. if ship placement is possible:
+	 * 			3.1. set this Ship object's location
+	 * 			3.2. add to fleet
+	 * 			3.3. draw on selfBoard
+	 * Fire hidden submit button to move on to next phase of game
+	 */
 	public void setUpFleet() {
-		/* iterate until fleetSize == 5
-		 * ship = shipInfo.getFirst()
-		 * generate random coordinate from (x,y) and random alignment
-		 * check if ship placement is possible - super.checkPossible()
-		 * if possible, set ship.setLocation
-		 * super.addShip
-		 * screen.getSelfBoard.draw()
-		 * screen.getFleetSetUp.grayOut()
-		 * shipInfo.removeFirst
-		 * end iteration
-		 * screen.getSubmit().doClick()
-		 */
 
 		Random r = new Random();
 		while(super.getFleetSize()!=5) {
@@ -72,12 +69,15 @@ public class Computer extends Player{
 				shipInfo.removeFirst();
 			}
 		}
-
-
-
 	}
 
-
+	/**
+	 * factory of coordinates for specified ship at specified coordinates
+	 * @param x		starting x coordinate
+	 * @param y		starting y coordinate
+	 * @param ship	Ship object for whom coordinates need to be made
+	 * @return		array of coordinates for this ship
+	 */
 	private Coordinate[] makeCoordinates(int x, int y, Ship ship) {
 		Coordinate[] coods = new Coordinate[ship.getSize()];
 		if(ship.getAlignment().equals(Alignment.HORIZONTAL)) {
@@ -96,7 +96,18 @@ public class Computer extends Player{
 	}
 
 
-	//set n coordinates to be shot this turn
+	/**
+	 * AI attack when at least one hit has been found
+	 * Select n number of shots with highest probability of getting a hit
+	 * When all shots are taken : 
+	 * 		1. get judgment on shots
+	 * 		2. update Computer's attackData and opponent's selfData
+	 * 		3. draw on Computer's attackBoard
+	 * 		4. check if opponent's entire fleet is sunk - if yes, display winning message and exit
+	 * 		5. check if any of opponent's ship is sunk in this turn - if yes, update it's maximum allowable shots per turn and icon on center panel
+	 * 		6. move on to next phase of game, i.e., intiate opponent's gamePlayScreen
+	 * @param n		number of shots per turn
+	 */
 	public void attack(int n) {
 
 		int i =0;
@@ -141,7 +152,15 @@ public class Computer extends Player{
 
 	}
 
-	//sets list of all possible shots (in coordinate form) with their priority
+	/**
+	 * AI attack strategy to find the probability of getting a hit on each cell
+	 * Set initial probability of all cells to 0
+	 * Iterate for each cell on board:
+	 * 		1. Iterate for each healthy ship of opponent's fleet:  
+	 * 			1.1. if this cell has not been targeted yet and ship can be placed starting from this cell, increment its probability
+	 * 			1.2. if this cell has previously been hit, increment probability of available cells on all 4 sides
+	 * @return	list of coordinates ordered from highest to lowest probability of getting a hit
+	 */
 	private LinkedList<int[]> attackStrategy() {
 		// TODO Auto-generated method stub
 		double[][] prob = new double[10][10];
@@ -240,7 +259,14 @@ public class Computer extends Player{
 
 
 
-	//check if ship of size shipSize can be placed at (x,y) with alignment align on attackData
+	/**
+	 * check if ship of size shipSize can be placed at (x,y) with alignment align on opponent's board
+	 * @param shipSize	size of ship in question
+	 * @param x		starting x coordinate
+	 * @param y		starting y coordinate
+	 * @param align	specified alignment of ship
+	 * @return	if ship can be placed here, return the end coordinates; otherwise return null;
+	 */
 	public int[] checkPossibleHit(int shipSize, int x, int y, Alignment align) {
 		int endX, endY;
 		if(align.equals(Alignment.HORIZONTAL)) {
@@ -271,7 +297,10 @@ public class Computer extends Player{
 
 	}
 
-	//prints the probability distribution of attacking opponent
+	/**
+	 * prints the probability distribution of getting a hit on opponent's board (for debugging purposes)
+	 * @param prob	the 2D array of probability distribution
+	 */
 	public void printProbDist(double[][] prob) {
 		for(int i=0;i<10;i++) {
 			for(int j=0;j<10;j++)
@@ -280,7 +309,11 @@ public class Computer extends Player{
 		}
 	}
 
-	//attack n number of random shots
+	/**
+	 * AI attack strategy when no hits have been found
+	 * Select n number of random cells that have not been targeted yet
+	 * @param n		number of allowable shots per turn
+	 */
 	public void attackRandom(int n) {
 		int i=0;
 		Random r = new Random();

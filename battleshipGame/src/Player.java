@@ -169,7 +169,7 @@ public class Player {
 		attackData[y][x] = temp;
 		printAttackData();
 	}
-	
+
 	/**
 	 * This method checks if a ship of specified size can be placed on the player's fleet while respecting the following constraints : 
 	 * 1. The entirety of a ship must be placed on the board, i.e., edge constraints
@@ -285,7 +285,7 @@ public class Player {
 	}
 
 
-	
+
 
 
 }

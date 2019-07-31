@@ -25,6 +25,14 @@ import javax.swing.JToggleButton;
 import javax.swing.border.LineBorder;
 import javax.swing.JLabel;
 
+/**
+ * Class for displaying self board of a player during initial fleet placement phase
+ * Alignment of each ship can be preset 
+ * Ships can be dragged and dropped onto board
+ * @author Group 3
+ * @version 1.2
+ *
+ */
 public class SelfBoard extends JPanel implements ActionListener{
 
 	private HashMap<String,Ship> shipInfo = new HashMap<String,Ship>();
@@ -37,7 +45,11 @@ public class SelfBoard extends JPanel implements ActionListener{
 	private LinkedList<JToggleButton> alignmentBtns = new LinkedList<JToggleButton>();
 	private LinkedList<JPanel> shipPanels = new LinkedList<JPanel>();
 	private JPanel board;
-	
+
+	/**
+	 * constructor to design the basic GUI
+	 * @param p
+	 */
 	public SelfBoard(Player p) {
 		super();
 		player = p;
@@ -122,26 +134,50 @@ public class SelfBoard extends JPanel implements ActionListener{
 
 	}
 
+	/**
+	 * set the current ship being dragged
+	 * @param shipName	name/ID of the ship
+	 */
 	public void setShipTemp(String shipName) {
 		System.out.println("ship type set to "+shipName);
 		this.shipTemp = shipInfo.get(shipName);
 	}
+	/**
+	 * @return	the current ship being dragged, null if no ship is being dragged or mouse is released onto non-droppable component
+	 */
 	public Ship getShipTemp() {
 		return this.shipTemp;
 	}
 
+	/**
+	 * @return the associated Player object
+	 */
 	public Player getPlayer() {
 		return this.player;
 	}
+
+	/**
+	 * class to listen to mouse events all across the panel
+	 * @author Group 3
+	 * @version 1.2
+	 */
 	private class mouseListener extends MouseAdapter{
 
 		private SelfBoard gt;
 		private LinkedList<String> placedShips;
 
+		/**
+		 * construct a mouse listener for the entire SelfBoard panel gt
+		 * @param gt	selfBoard panel
+		 */
 		public mouseListener(SelfBoard gt) {
 			this.gt = gt;
 			this.placedShips = new LinkedList<String>();
 		}
+		/**
+		 * During fleet placement phase, set shipTemp to the ship that has been pressed on, provided this ship is not already placed
+		 * @see java.awt.event.MouseAdapter#mousePressed(java.awt.event.MouseEvent)
+		 */
 		@Override
 		public void mousePressed(MouseEvent e) {
 			if(gt.getSelfGridListener()) {
@@ -155,6 +191,13 @@ public class SelfBoard extends JPanel implements ActionListener{
 
 		}
 
+		/**
+		 * During fleet placement phase, place the dragged ship onto board (if possible)
+		 * Disable dragging of this ship in future
+		 * Reset shipTemp to null
+		 * if entire fleet is placed, fire hidden submit button of this player's Screen
+		 * @see java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
+		 */
 		@Override
 		public void mouseReleased(MouseEvent e) {
 
@@ -168,15 +211,6 @@ public class SelfBoard extends JPanel implements ActionListener{
 						int x = (int)cell.getClientProperty("j");
 						int y = (int)cell.getClientProperty("i");
 						if(gt.getPlayer().checkPossible(ship.getSize(), x,y, ship.getAlignment())) {
-							/*TODO
-							 * place ship if possible
-							 * update player's selfdata
-							 * update ship's location
-							 * draw
-							 * set this shipPanel to disable mousePressed
-							 * set this alignment to disable ----
-							 */
-
 							Coordinate[] coordinates = this.makeCoordinates(x, y, ship.getName());	//make coordinates according to ship alignment
 							ship.setLocation(coordinates);	//add this location to this ship
 							gt.getPlayer().addShip(ship, coordinates);	//add this ship to this player's fleet
@@ -199,7 +233,13 @@ public class SelfBoard extends JPanel implements ActionListener{
 
 		}
 
-		//return coordinates ArrayList from (x,y) according to size and alignment
+		/**
+		 * return coordinates array from (x,y) according to size and alignment of specified ship (identified by its name)
+		 * @param x		starting x coordinate
+		 * @param y		starting y coordinate
+		 * @param shipName	name/identifier of ship
+		 * @return	Coordinate array
+		 */
 		public Coordinate[] makeCoordinates(int x, int y, String shipName) {
 			Ship ship = shipInfo.get(shipName);
 			Coordinate[] coods = new Coordinate[ship.getSize()];
@@ -218,6 +258,10 @@ public class SelfBoard extends JPanel implements ActionListener{
 			return coods;
 		}
 
+		/**
+		 * During fleet placement phase, repaint cells if dragged ship can placed 
+		 * @see java.awt.event.MouseAdapter#mouseDragged(java.awt.event.MouseEvent)
+		 */
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			if(gt.getSelfGridListener()) {
@@ -239,7 +283,9 @@ public class SelfBoard extends JPanel implements ActionListener{
 
 	}
 
-	//repaint cells 
+	/**
+	 * repaint cells
+	 */
 	public void draw() {
 		int temp[][] = this.player.getSelfData();
 		Color c = null;
@@ -258,6 +304,10 @@ public class SelfBoard extends JPanel implements ActionListener{
 		}
 	}
 
+	/**
+	 * remove icon of placed ship
+	 * @param name 	Name/Identifier of ship
+	 */
 	public void removeIcon(String name) {
 		for(JPanel p : shipPanels)
 			if(p.getClientProperty("shipName").equals(name)) {
@@ -266,10 +316,17 @@ public class SelfBoard extends JPanel implements ActionListener{
 			}	
 	}
 
+	/**
+	 * @return true if this self board should be responding to mouse events (during fleet placement phase), false otherwise (during attack phase)
+	 */
 	public boolean getSelfGridListener() {
 		return isSelfGridListener;
 	}
 
+	/**
+	 * disable alignment button for this ship
+	 * @param name	Name/Identifier of ship
+	 */
 	public void disableAlignmentBtn(String name) {
 		for(JToggleButton b : alignmentBtns)
 			if(b.getClientProperty("shipName").equals(name)) {
@@ -279,6 +336,11 @@ public class SelfBoard extends JPanel implements ActionListener{
 	}
 
 	//repaint cells	
+	/**
+	 * repaint cells when ships is dragged over them, provided ship can be placed there
+	 * @param iStart	starting y coordinate
+	 * @param jStart	starting x coordinate
+	 */
 	public void drawTemporaryPlacement(int iStart, int jStart) {
 		draw();
 		int temp[][] = this.player.getSelfData();
@@ -299,6 +361,10 @@ public class SelfBoard extends JPanel implements ActionListener{
 
 
 
+	/**
+	 * listener to alignment buttons
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Alignment newAlignment;
@@ -311,10 +377,18 @@ public class SelfBoard extends JPanel implements ActionListener{
 		((JToggleButton) e.getSource()).setText(newAlignment.toString());
 	}
 
+	/**
+	 * set listener (controller of mouse events) 
+	 * @param b	true/false
+	 */
 	public void setSelfGridListener(boolean b) {
 		this.isSelfGridListener = b ;
 	}
 
+	/**
+	 * During attack phase, this method is called to display only the board and other components (JLabels, JToggleButtons,etc) are removed
+	 * @return	attack board
+	 */
 	public JPanel getBoard() {
 		this.removeAll();
 		setLayout(new GridLayout(10,10));

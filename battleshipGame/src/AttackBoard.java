@@ -1,28 +1,29 @@
-/*
- * Class representing attack board of each player
- * @author Group 3
- * @version 1.2
- */
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.LinkedList;
-
+/**
+ * Class representing attack board of each player
+ * @author Group 3
+ * @version 1.2
+ */
 public class AttackBoard extends JPanel implements MouseListener{
 
-	private Player player;
-	private JPanel self;
-	private boolean attackGridListener = false;
-	private JPanel[][] cells = new JPanel[10][10];
-	private int shotsPerTurn;
-	private int curShots;
-	private int oppoSunkShips;
-	private HashMap<Coordinate,Boolean> shots = new HashMap<Coordinate,Boolean>();
+	private Player player;	//the associated player
+	private JPanel self;	//the JPanel containing the board
+	private boolean attackGridListener = false;	//controller for when to turn on attack grid to listening mode
+	private JPanel[][] cells = new JPanel[10][10];	//array of JPanels for the board
+	private int shotsPerTurn;	//allowable maximum shots per turn
+	private int curShots;	//number of shots left for this turn (useful in salvo variation)
+	private int oppoSunkShips;	//number of ships sunk in opponent's fleet (useful in salvo variation)
+	private HashMap<Coordinate,Boolean> shots = new HashMap<Coordinate,Boolean>();	//maps coordinates of attempted shots to whether they were hit or miss (useful in salvo variation) 
 	
-	//constructs a new attack board for Player p
+	/**
+	 * constructs a new attack board for Player p
+	 * @param p	the Player object
+	 */
 	public AttackBoard(Player p) {
 		this.player = p;
 		this.shotsPerTurn = 5;
@@ -32,11 +33,7 @@ public class AttackBoard extends JPanel implements MouseListener{
 		this.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, Color.BLACK));
         self = new JPanel();
         self.setLayout(new GridLayout(10,10));
-        if(p.getName().equals("Player 1"))
-        	this.add(new JLabel("Player 2"));
-        else
-        	this.add(new JLabel("Player 1"));
-
+        this.add(new JLabel("Select your shots here!"));
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
             	JPanel firstCell = new JPanel();
@@ -55,13 +52,31 @@ public class AttackBoard extends JPanel implements MouseListener{
 	
 	
 	
-	//set listener of attack board
+	/**
+	 * set the attackGridListener
+	 * @param b true if attackBoard is supposed to listen; false otherwise
+	 */
 	public void setAttackGridListener(boolean b) {
 		this.attackGridListener = b;
 	}
 
 
 
+	/** This method is called when player clicks on attack board but ignores if the cell is already clicked before.
+	 * Player gets to take all allowable shots per turn before getting to know the outcome (hit/miss) in the next turn
+	 * Once all allowable shots are taken the following are done:
+	 * 		1. timer for this player is stopped
+	 * 		2. shots counter is reset
+	 * 		3. judgment is passed on all the shots (hit/miss) 
+	 * 		4. show results(or paint) on this player's attack board and opponent's self board according to judgment
+	 * 		5. For Salvo variation : if new ships are sunk from opponent's fleet: 
+	 * 			5.1. decrease opponent's allowable shots per turn by 1
+	 * 			5.2. update oppoSunkShips field
+	 * 			5.3. update icons in the center panel
+	 * 		6. if all ships sunk from opponent's fleet, display message and close
+	 * Hide this Screen and get opponent's gamePlay Screen
+	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if(this.attackGridListener) {
@@ -111,48 +126,42 @@ public class AttackBoard extends JPanel implements MouseListener{
 				oppo.getScreen().gamePlayScreen();
 				
 			}
-			/*
-			 * IF curShots<shots ->store in hit coordinates array
-			 * ELSE
-			 * set attackGridListener to false to avoid more clicks
-			 * stop time
-			 * reset curShots
-			 * get hit or miss on each shot, 
-			 * update AttackData and opponent's self data, 
-			 * update ship's hashmap if hit
-			 * if sunk then update attack panel and opponent's shots per turn
-			 * draw()
-			 * clear hit coordinates array
-			 * update score of this player
-			 * wait for a brief time (optional)
-			 * set attackGridListener back to true
-			 * hide this screen and show opponent's screen
-			 * start opponent's timer
-			 */
-			
-			
 		}
-		
 	}
 
 
-	//decreases current shots per turn of this player by i
+	/**
+	 * decreases current shots per turn of this player by i, but keeps it minimum to 0 (so that same method can be used for both normal and salvo variations)
+	 * @param i	decrement
+	 */
 	public void decreaseCurShotsPerTurn(int i) {
 		if(this.shotsPerTurn - i > 0)
 			this.shotsPerTurn -= i;
 	}
 
-	//sets the current shots per turn of this player to i
+	/**
+	 * sets the current shots per turn of this player to i
+	 * @param i	specified current shots per turn
+	 */
 	public void setCurShotsPerTurn(int i) {
 		this.shotsPerTurn = i;
 	}
 	
-	//get current shots allowed per turn
+	/**
+	 * get current shots allowed per turn
+	 * @return maximum allowable shots per turn - number of shots already taken this turn
+	 */
 	public int getCurShotsPerTurn() {
 		return shotsPerTurn-curShots;
 	}
 	
-	//paint each cell
+	/**
+	 * paint each cell of attack board
+	 * blue = available
+	 * dark gray = miss
+	 * red = hit
+	 * white = attempted shot
+	 */
 	public void draw() {
 		int temp[][] = this.player.getAttackData();
 		Color c = null;
